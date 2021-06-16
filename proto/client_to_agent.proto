@@ -1,0 +1,100 @@
+syntax = "proto3";
+
+service Agent {
+    rpc TryLogin (LoginRequest) returns (LoginReply) {}
+}
+
+service Lobby {
+    rpc TryChatSend (Chat) returns (Empty) {}
+    rpc TryChatReceive (Chat) returns (stream Chat) {}
+    rpc TryUserRemove(UserRequest) returns (Empty) {}
+    rpc TryCommand (CommandRequest) returns (CommandReply) {}
+    rpc TryUserExit (UserRequest) returns (StatusReply) {}
+    rpc TryStatusRequest(UserRequest) returns (stream StatusReply) {}
+}
+
+service Channel {
+    rpc TryChatSend (Chat) returns (Empty) {}
+    rpc TryChatReceive (Chat) returns (stream Chat) {}
+    rpc TryUserRemove(UserRequest) returns (Empty) {}
+    rpc TryStatusRequest(UserRequest) returns (stream StatusReply) {}
+}
+
+service Heartbeat {
+    rpc TryHeartbeat (HeartbeatRequest) returns (stream HeartbeatReply) {}
+    rpc TryUserLives (UserRequest) returns (UserLivesReply) {}
+}
+
+
+message Chat {
+    int32 index = 1;
+    optional string text = 2;
+}
+
+message CommandRequest {
+    enum Status {
+        LIST_CHANNELS = 0;
+        MAKE_CHANNEL = 1;
+        JOIN_CHANNEL = 2;
+        LEAVE_CHANNEL = 3;
+        LIST_USERS = 4;
+    }
+    Status status = 1;
+    int32 index = 2;
+    optional int32 channel = 3;
+}
+
+message CommandReply {
+    enum Status {
+        SUCCESS = 0;
+        FAILURE = 1;
+    }
+    optional Status status = 1;
+    optional string address = 2;
+    repeated int32 channels = 3;
+    repeated int32 users = 4;
+}
+
+message Empty {}
+
+message HeartbeatRequest {
+    int32 index = 1;
+}
+
+message HeartbeatReply {
+    int64 time = 1;
+}
+
+message LoginRequest {
+    string ip = 1;
+}
+
+message LoginReply {
+    int32 index = 1;
+    string heartbeat_ip = 2;
+    string lobby_ip = 3;
+}
+
+message StatusReply {
+    enum Status {
+        OK = 0;
+        JOIN_USER = 1;
+        LEAVE_USER = 2;
+        QUIT = 3;
+    }
+    Status status = 1;
+    int32 index = 2;
+    optional int32 channel = 3;
+}
+
+message UserRequest {
+    int32 index = 1;
+}
+
+message UserLivesReply {
+    enum Status {
+        LIVE = 0;
+        UNKNOWN = 1;
+    }
+    Status status = 1;
+}
